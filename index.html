@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>mahrossa</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#fbf6f4;--card:#fff;--text:#2b1d20;--muted:#7a6568;--accent:#9b2c4a;--accent-t:#fff;--line:#ead9dc}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1a1214;--card:#251a1d;--text:#f5eceb;--muted:#b9a5a8;--accent:#d9587c;--accent-t:#1a1214;--line:#3b2a2e;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#1a1214;--card:#251a1d;--text:#f5eceb;--muted:#b9a5a8;--accent:#d9587c;--accent-t:#1a1214;--line:#3b2a2e;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Segoe UI",Tahoma,Arial,sans-serif;line-height:1.8}
+header{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid var(--line);background:var(--card)}
+.brand{font-size:26px;font-weight:700;color:var(--accent);letter-spacing:1px;direction:ltr}
+button,input,textarea{font:inherit}
+.btn{background:var(--accent);color:var(--accent-t);border:0;border-radius:10px;padding:10px 18px;cursor:pointer;font-weight:600}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.btn.danger{background:transparent;color:#c0392b;border:1px solid #c0392b}
+main{max-width:900px;margin:0 auto;padding:20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:20px}
+h1{margin:0 0 8px;font-size:28px}h2{margin:0 0 8px;font-size:20px;color:var(--accent)}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.tab{padding:6px 14px;border-radius:20px;border:1px solid var(--line);background:var(--card);color:var(--text);cursor:pointer}
+.tab.on{background:var(--accent);color:var(--accent-t);border-color:var(--accent)}
+.hero{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:14px;background:var(--line);display:block}
+.ph{display:flex;align-items:center;justify-content:center;color:var(--muted);border:2px dashed var(--line);border-radius:14px;aspect-ratio:4/3;font-size:14px}
+.cap{text-align:center;color:var(--muted);margin:10px 0 18px;white-space:pre-wrap}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:8px 0 18px}
+.grid img,.grid .ph{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px}
+@media (max-width:640px){.grid{grid-template-columns:repeat(2,1fr)}}
+.txt{white-space:pre-wrap;margin:0 0 14px}
+label{display:block;font-weight:600;margin:12px 0 4px}
+input[type=text],input[type=tel],input[type=number],select,textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text)}
+select:focus,input:focus,textarea:focus{outline:2px solid var(--accent)}
+.req{color:#c0392b}
+.order{border:2px solid var(--accent)}
+.price{font-size:22px;font-weight:700;color:var(--accent)}
+.badge{display:inline-block;background:var(--line);padding:4px 12px;border-radius:20px;font-size:14px;margin-bottom:10px}
+.ok{background:#e7f6ec;color:#1e6b3a;padding:14px;border-radius:10px;margin-top:12px;display:none}
+.thumbs{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}.thumbs img{width:56px;height:56px;object-fit:cover;border-radius:8px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header><div class="brand">mahrossa</div><button class="btn ghost" id="toggleAdmin">+ إضافة منتج جديد</button></header>
+<main>
+<section class="card" id="admin" hidden>
+ <h2>إضافة منتج جديد</h2>
+ <label>عنوان المنتج</label><input type="text" id="aTitle">
+ <label>وصف المنتج</label><textarea id="aDesc" rows="3"></textarea>
+ <label>مكونات المنتج</label><textarea id="aIng" rows="3"></textarea>
+ <label>السعر (اختياري)</label><input type="text" id="aPrice" placeholder="مثال: 3500 دج">
+ <label>الصورة الكبيرة للمنتج</label><input type="file" id="aMain" accept="image/*">
+ <label>النص تحت الصورة</label><input type="text" id="aCap">
+ <label>صور إضافية متوسطة الحجم (حتى 8 صور)</label><input type="file" id="aGal" accept="image/*" multiple>
+ <div class="thumbs" id="aThumbs"></div>
+ <div style="margin-top:16px;display:flex;gap:8px"><button class="btn" id="aSave">حفظ المنتج</button><button class="btn ghost" id="aCancel">إلغاء</button></div>
+</section>
+
+<div class="tabs" id="tabs"></div>
+<section class="card" id="product"></section>
+
+<section class="card order" id="orderBox">
+ <h2>اطلب الآن — الدفع عند الاستلام</h2>
+ <span class="badge">💵 لا تدفع شيئًا الآن، الدفع عند وصول الطلب</span>
+ <form id="orderForm" novalidate>
+  <label>الاسم الكامل <span class="req">*</span></label>
+  <input type="text" id="oName" required autocomplete="name">
+  <label>رقم الهاتف <span class="req">*</span></label>
+  <input type="tel" id="oPhone" required inputmode="tel" autocomplete="tel" pattern="[0-9+ ]{8,15}">
+  <label>الولاية <span class="req">*</span></label>
+  <select id="oWilaya" required><option value="">اختر الولاية</option></select>
+  <label>المنطقة / البلدية <span class="req">*</span></label>
+  <input type="text" id="oCommune" required placeholder="اكتب اسم البلدية أو الحي" autocomplete="address-level2">
+  <div style="margin-top:16px"><button class="btn" type="submit" style="width:100%;font-size:18px">تأكيد الطلب</button></div>
+ </form>
+ <div class="ok" id="ok">✅ تم تسجيل طلبك بنجاح، سنتصل بك قريبًا لتأكيد التوصيل.</div>
+</section>
+</main>
+
+<script>
+(function(){
+var KEY="mahrossa_products",products=[],cur=0,tmp={main:"",gal:[]};
+function $(i){return document.getElementById(i)}
+function esc(s){var d=document.createElement("div");d.textContent=s||"";return d.innerHTML}
+function load(){try{var r=localStorage.getItem(KEY);if(r)products=JSON.parse(r)||[]}catch(e){}
+ if(!products.length)products=[{title:"عنوان المنتج",desc:"وصف المنتج يظهر هنا.",ing:"مكونات المنتج تظهر هنا.",price:"",main:"",cap:"النص الذي يظهر تحت الصورة الكبيرة",gal:[]}]}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(products))}catch(e){alert("تعذر الحفظ: الصور كبيرة جدًا، جرّب عددًا أقل من الصور.")}}
+function render(){
+ var t=$("tabs");t.innerHTML="";
+ if(products.length>1)products.forEach(function(p,i){var b=document.createElement("button");b.className="tab"+(i===cur?" on":"");b.textContent=p.title;b.onclick=function(){cur=i;render()};t.appendChild(b)});
+ var p=products[cur],g="";
+ for(var i=0;i<8;i++)g+=p.gal[i]?'<img src="'+p.gal[i]+'" alt="">':'<div class="ph">صورة '+(i+1)+'</div>';
+ $("product").innerHTML='<h1>'+esc(p.title)+'</h1>'+(p.price?'<div class="price">'+esc(p.price)+'</div>':'')
+ +(p.main?'<img class="hero" src="'+p.main+'" alt="">':'<div class="ph">الصورة الكبيرة للمنتج</div>')
+ +'<div class="cap">'+esc(p.cap)+'</div><div class="grid">'+g+'</div>'
+ +'<h2>وصف المنتج</h2><p class="txt">'+esc(p.desc)+'</p><h2>مكونات المنتج</h2><p class="txt">'+esc(p.ing)+'</p>'
+ +(products.length>1||p.title!=="عنوان المنتج"?'<button class="btn danger" id="del">حذف هذا المنتج</button>':'');
+ var d=$("del");if(d)d.onclick=function(){if(confirm("حذف المنتج؟")){products.splice(cur,1);cur=0;if(!products.length)load();save();render()}};
+}
+function shrink(file){return new Promise(function(res){var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var m=900,s=Math.min(1,m/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=im.width*s;c.height=im.height*s;c.getContext("2d").drawImage(im,0,0,c.width,c.height);res(c.toDataURL("image/jpeg",0.7))};im.src=r.result};r.readAsDataURL(file)})}
+$("toggleAdmin").onclick=function(){$("admin").hidden=!$("admin").hidden};
+$("aCancel").onclick=reset;
+function reset(){["aTitle","aDesc","aIng","aPrice","aCap"].forEach(function(i){$(i).value=""});$("aMain").value="";$("aGal").value="";$("aThumbs").innerHTML="";tmp={main:"",gal:[]};$("admin").hidden=true}
+$("aMain").onchange=function(e){if(e.target.files[0])shrink(e.target.files[0]).then(function(u){tmp.main=u})};
+$("aGal").onchange=function(e){var f=Array.prototype.slice.call(e.target.files,0,8);Promise.all(f.map(shrink)).then(function(a){tmp.gal=a;$("aThumbs").innerHTML=a.map(function(u){return'<img src="'+u+'" alt="">'}).join("")})};
+$("aSave").onclick=function(){var t=$("aTitle").value.trim();if(!t){$("aTitle").focus();return}
+ if(products.length===1&&products[0].title==="عنوان المنتج"&&!products[0].main)products=[];
+ products.push({title:t,desc:$("aDesc").value,ing:$("aIng").value,price:$("aPrice").value,cap:$("aCap").value,main:tmp.main,gal:tmp.gal});
+ cur=products.length-1;save();reset();render();window.scrollTo(0,0)};
+$("orderForm").onsubmit=function(e){e.preventDefault();
+ var n=$("oName"),p=$("oPhone");
+ if(!n.value.trim()){n.focus();n.reportValidity&&n.reportValidity();return}
+ if(!/^[0-9+ ]{8,15}$/.test(p.value.trim())){p.focus();alert("يرجى إدخال رقم هاتف صحيح");return}
+ var w=$("oWilaya"),c=$("oCommune");
+ if(!w.value){w.focus();alert("يرجى اختيار الولاية");return}
+ if(!c.value.trim()){c.focus();alert("يرجى كتابة المنطقة / البلدية");return}
+ try{var o=JSON.parse(localStorage.getItem("mahrossa_orders")||"[]");o.push({name:n.value.trim(),phone:p.value.trim(),wilaya:w.value,commune:c.value.trim(),product:products[cur].title,at:new Date().toISOString()});localStorage.setItem("mahrossa_orders",JSON.stringify(o))}catch(x){}
+ $("ok").style.display="block";$("orderForm").reset()};
+var W="أدرار،الشلف،الأغواط،أم البواقي،باتنة،بجاية،بسكرة،بشار،البليدة،البويرة،تمنراست،تبسة،تلمسان،تيارت،تيزي وزو،الجزائر،الجلفة،جيجل،سطيف،سعيدة،سكيكدة،سيدي بلعباس،عنابة،قالمة،قسنطينة،المدية،مستغانم،المسيلة،معسكر،ورقلة،وهران،البيض،إليزي،برج بوعريريج،بومرداس،الطارف،تندوف،تيسمسيلت،الوادي،خنشلة،سوق أهراس،تيبازة،ميلة،عين الدفلى،النعامة،عين تموشنت،غرداية،غليزان،تيميمون،برج باجي مختار،أولاد جلال،بني عباس،إن صالح،إن قزام،تقرت،جانت،المغير،المنيعة".split("،");
+ W.forEach(function(n,i){var o=document.createElement("option");o.value=n;o.textContent=(i+1<10?"0":"")+(i+1)+" - "+n;$("oWilaya").appendChild(o)});
+ load();render();
+})();
+</script>
+</body>
+</html>
